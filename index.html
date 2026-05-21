@@ -311,11 +311,7 @@
           северными историями, фольклором и способностью пережить Историю искусств до Византии.
           Евгения подтверждает: такой выпуск не отвалился, а стал отдельным экспонатом.
         </div>
-        <div style="margin: 12px 0;">
-          <button class="small-btn" id="playFinalBtn" type="button" onclick="playFinalManual()">Включить финальную музыку</button>
-          <button class="small-btn" id="pauseFinalBtn" type="button" onclick="pauseFinalManual()">Пауза</button>
-        </div>
-        <h2 class="result-title" id="resultTitle">Финальный вердикт дневника</h2>
+<h2 class="result-title" id="resultTitle">Финальный вердикт дневника</h2>
         <div class="stars" id="starRating"></div>
         <p id="finalText"></p>
         <div class="levels" id="levels"></div>
@@ -331,9 +327,9 @@
   <script>
     "use strict";
     const PLAYLIST = ["track-1.mp3"];
-    const FINAL_TRACK = "final.mp3";
+
     const audio = document.getElementById("audio");
-    let trackIndex = 0, finalPlaying = false;
+    let trackIndex = 0;
 
     function playTrack(src) {
       audio.src = src;
@@ -343,11 +339,10 @@
       const resume = ctx.state === "suspended" ? ctx.resume() : Promise.resolve();
       resume.then(() => audio.play()).catch(() => {});
     }
-    function startPlaylist() { if (finalPlaying) return; trackIndex = 0; playTrack(PLAYLIST[trackIndex]); }
-    function playFinal() { finalPlaying = true; playTrack(FINAL_TRACK); }
+    function startPlaylist() { trackIndex = 0; playTrack(PLAYLIST[trackIndex]); }
+    function playFinal() { /* музыка продолжает играть */ }
 
     audio.addEventListener("ended", () => {
-      if (finalPlaying) return;
       trackIndex = (trackIndex + 1) % PLAYLIST.length;
       playTrack(PLAYLIST[trackIndex]);
     });
@@ -454,7 +449,7 @@
     btnStart.addEventListener("click", () => {
       startWrap.style.display = "none";
       quizEl.classList.remove("quiz-hidden");
-      startPlaylist();
+      if (audio.paused) startPlaylist();
       quizEl.scrollIntoView({ behavior: "smooth", block: "start" });
     });
 
@@ -587,7 +582,7 @@
       });
 
       finalEl.classList.add("show");
-      finalEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      document.getElementById("resultTitle").scrollIntoView({ behavior: "smooth", block: "start" });
       burst(50); fireworks(); playFinal();
     }
 
@@ -670,24 +665,8 @@
       }
     }
 
-    function playFinalManual() {
-      const ctx = audioCtx();
-      if (ctx.state === "suspended") ctx.resume();
-      playFinal();
-    }
-    function pauseFinalManual() {
-      const btn = document.getElementById("pauseFinalBtn");
-      if (audio.paused) {
-        audio.play().catch(() => {});
-        btn.textContent = "Пауза";
-      } else {
-        audio.pause();
-        btn.textContent = "Играть";
-      }
-    }
 
-    document.getElementById("again").addEventListener("click", () => {
-      finalPlaying = false;
+document.getElementById("again").addEventListener("click", () => {
       startWrap.style.display = "";
       quizEl.classList.add("quiz-hidden");
       renderQuiz();

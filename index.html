@@ -327,6 +327,13 @@
 
   <script>
     "use strict";
+        const audioCtx = (() => {
+      let ctx = null;
+      return () => {
+        if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+        return ctx;
+      };
+    })();
     const PLAYLIST = ["track-1.mp3"];
 
     const audio = document.getElementById("audio");
@@ -453,15 +460,6 @@
       if (audio.paused) startPlaylist();
       quizEl.scrollIntoView({ behavior: "smooth", block: "start" });
     });
-
-    const audioCtx = (() => {
-      let ctx = null;
-      return () => {
-        if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
-        return ctx;
-      };
-    })();
-
     function playCorrect() {
       try {
         const ctx = audioCtx();

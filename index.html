@@ -311,6 +311,10 @@
           северными историями, фольклором и способностью пережить Историю искусств до Византии.
           Евгения подтверждает: такой выпуск не отвалился, а стал отдельным экспонатом.
         </div>
+        <div style="margin: 12px 0;">
+          <button class="small-btn" id="playFinalBtn" type="button" onclick="playFinalManual()">Включить финальную музыку</button>
+          <button class="small-btn" id="pauseFinalBtn" type="button" onclick="pauseFinalManual()">Пауза</button>
+        </div>
         <h2 class="result-title" id="resultTitle">Финальный вердикт дневника</h2>
         <div class="stars" id="starRating"></div>
         <p id="finalText"></p>
@@ -331,7 +335,14 @@
     const audio = document.getElementById("audio");
     let trackIndex = 0, finalPlaying = false;
 
-    function playTrack(src) { audio.src = src; audio.load(); audio.play().catch(() => {}); }
+    function playTrack(src) {
+      audio.src = src;
+      audio.load();
+      // Resume AudioContext if suspended (browser autoplay policy)
+      const ctx = audioCtx();
+      const resume = ctx.state === "suspended" ? ctx.resume() : Promise.resolve();
+      resume.then(() => audio.play()).catch(() => {});
+    }
     function startPlaylist() { if (finalPlaying) return; trackIndex = 0; playTrack(PLAYLIST[trackIndex]); }
     function playFinal() { finalPlaying = true; playTrack(FINAL_TRACK); }
 
@@ -341,9 +352,20 @@
       playTrack(PLAYLIST[trackIndex]);
     });
 
-    document.getElementById("playRepoMusic").addEventListener("click", startPlaylist);
+    document.getElementById("playRepoMusic").addEventListener("click", () => {
+      const ctx = audioCtx();
+      if (ctx.state === "suspended") ctx.resume();
+      startPlaylist();
+    });
     document.getElementById("pauseMusic").addEventListener("click", () => {
-      audio.paused ? audio.play().catch(() => {}) : audio.pause();
+      const btn = document.getElementById("pauseMusic");
+      if (audio.paused) {
+        audio.play().catch(() => {});
+        btn.textContent = "Пауза";
+      } else {
+        audio.pause();
+        btn.textContent = "Играть";
+      }
     });
 
 
@@ -645,6 +667,22 @@
           const y = rect.top + 20 + Math.random() * (rect.height - 40);
           splash(x, y);
         }, i * 120);
+      }
+    }
+
+    function playFinalManual() {
+      const ctx = audioCtx();
+      if (ctx.state === "suspended") ctx.resume();
+      playFinal();
+    }
+    function pauseFinalManual() {
+      const btn = document.getElementById("pauseFinalBtn");
+      if (audio.paused) {
+        audio.play().catch(() => {});
+        btn.textContent = "Пауза";
+      } else {
+        audio.pause();
+        btn.textContent = "Играть";
       }
     }
 
